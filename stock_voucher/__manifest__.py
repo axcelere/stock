@@ -19,7 +19,7 @@
 ##############################################################################
 {
     'name': 'Stock Voucher',
-    'version': "13.0.1.3.1",
+    'version': "13.0.1.3.2",
     'category': 'Warehouse Management',
     'sequence': 14,
     'summary': '',
