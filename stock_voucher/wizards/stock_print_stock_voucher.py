@@ -92,7 +92,7 @@ class StockPrintStockVoucher(models.TransientModel):
                 {'type': 'ir.actions.act_window_close'},
                 self.do_print_voucher(),
             ],
-            'type': 'ir.actions.act_multi',
+            'type': 'ir.actions.act_window_close',
         }
 
     def do_clean(self):
