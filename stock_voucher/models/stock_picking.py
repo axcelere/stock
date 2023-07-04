@@ -61,7 +61,7 @@ class StockPicking(models.Model):
         if lines_per_voucher == 0:
             return res
 
-        operations = len(self.move_lines)
+        operations = len(self.move_line_ids)
         res = int(-(-float(operations) // float(lines_per_voucher)))
         return res
 
@@ -142,8 +142,8 @@ class StockPicking(models.Model):
 
     @api.depends(
         'automatic_declare_value',
-        'move_lines.state',
-        'move_lines.quantity_done',
+        'move_line_ids.state',
+        'move_line_ids.quantity_done',
         )
     def _compute_declared_value(self):
         for rec in self.filtered(lambda p: p.automatic_declare_value and p.state not in ['done', 'cancel']):
@@ -152,7 +152,7 @@ class StockPicking(models.Model):
             inmediate_transfer = True
             pricelist = False
             stock_bom_lines = self.env['stock.move']
-            for move_line in rec.move_lines.filtered(
+            for move_line in rec.move_line_ids.filtered(
                     lambda x: x.state != 'cancel'):
                 order_line = move_line.sale_line_id
                 if move_line.quantity_done:
