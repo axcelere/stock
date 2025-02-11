@@ -2,7 +2,7 @@
 # For copyright and license notices, see __manifest__.py file in module root
 # directory
 ##############################################################################
-from odoo import fields, models
+from odoo import fields, models, api
 
 
 class StockPickingType(models.Model):
@@ -35,3 +35,4 @@ class StockPickingType(models.Model):
         help="If set an email will be sent to the customer after the picking"
         " related to this picking type has been validated.",
     )
+ 

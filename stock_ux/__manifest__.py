@@ -19,20 +19,16 @@
 ##############################################################################
 {
     'name': 'Stock UX',
-    'version': "17.0.2.15.0",
+    'version': "17.0.2.16.0",
     'category': 'Warehouse Management',
     'sequence': 14,
     'summary': '',
     'author': 'ADHOC SA',
     'website': 'www.adhoc.com.ar',
-    'license': 'AGPL-3',
     'images': [
     ],
     'depends': [
         'sale_stock',
-        'report_aeroo',
-        'stock_voucher',
-        'product_expiry',
     ],
     'data': [
         'security/stock_ux_security.xml',
@@ -50,18 +46,19 @@
         'views/report_deliveryslip.xml',
         'views/res_config_settings_views.xml',
         'wizards/stock_operation_wizard_views.xml',
-        'report/stock_ux_report.xml',
         'report/ir.action.reports.xml',
         'report/picking_templates.xml',
+        'views/res_company_views.xml',
+        'views/stock_quant_views.xml'
     ],
-    'assets': {
-        'web.assets_backend': [
-            'stock/static/src/**/*.xml',
-        ],
-    },
-    'demo': [
-    ],
-    'installable': False,
+    'installable': True,
     'auto_install': False,
     'application': False,
+    'assets': {
+        'web.assets_backend': [
+            'stock_ux/static/src/**/*.xml',
+            'stock_ux/static/src/**/*.js',
+        ],
+    },
+    'license': 'AGPL-3',
 }

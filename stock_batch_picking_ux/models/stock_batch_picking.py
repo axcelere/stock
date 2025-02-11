@@ -19,10 +19,8 @@ class StockPickingBatch(models.Model):
         # required=True,
         help='If you choose a partner then only pickings of this partner will'
         'be sellectable',
-        states={'done': [('readonly', True)], 'cancel': [('readonly', True)]}
     )
     voucher_number = fields.Char(
-        states={'done': [('readonly', True)], 'cancel': [('readonly', True)]},
     )
     voucher_required = fields.Boolean(
         # related='picking_type_id.voucher_required',
@@ -34,6 +32,9 @@ class StockPickingBatch(models.Model):
     number_of_packages = fields.Integer(
         copy=False,
     )
+
+    picking_type_id = fields.Many2one(required=True)
+
     picking_type_ids = fields.Many2many(
         'stock.picking.type',
         # related='picking_type_id.voucher_required',
@@ -42,6 +43,23 @@ class StockPickingBatch(models.Model):
     vouchers = fields.Char(
         related='picking_ids.vouchers',
     )
+
+    picking_count = fields.Integer(
+        string="# Transferencias", compute="_compute_picking_count",
+    )
+
+    notes = fields.Text(help="free form remarks")
+
+    def _compute_picking_count(self):
+        """Calculate number of pickings."""
+        groups = self.env["stock.picking"]._read_group(
+            domain=[("batch_id", "in", self.ids)],
+            groupby=['batch_id'],
+            aggregates=['__count'],
+        )
+        counts = {g[0].id: g[1] for g in groups}
+        for batch in self:
+            batch.picking_count = counts.get(batch.id, 0)
 
     @api.depends('picking_ids')
     def _compute_picking_type_data(self):
@@ -93,12 +111,12 @@ class StockPickingBatch(models.Model):
             "context": {"create": False, "from_batch": True},
         }
 
-    def action_transfer(self):
+    def action_done(self):
         # agregamos los numeros de remito
         for rec in self:
             # al agregar la restriccion de que al menos una tenga que tener
             # cantidad entonces nunca se manda el force_qty al picking
-            if all(operation.qty_done == 0
+            if all(operation.quantity == 0
                     for operation in rec.move_line_ids):
                 raise UserError(_(
                     'Debe definir Cantidad Realizada en al menos una '
@@ -111,37 +129,26 @@ class StockPickingBatch(models.Model):
                     'number_of_packages': rec.number_of_packages})
 
             if rec.picking_type_code == 'incoming' and rec.voucher_number:
-                for picking in rec.active_picking_ids:
+                for picking in rec.picking_ids:
                     # agregamos esto para que no se asigne a los pickings
                     # que no se van a recibir ya que todavia no se limpiaron
                     # y ademas, por lo de arriba, no se fuerza la cantidad
                     # si son todos cero, se terminan sacando
-                    if all(operation.qty_done == 0
+                    if all(operation.quantity == 0
                             for operation in picking.move_line_ids):
                         continue
                     rec.env['stock.picking.voucher'].create({
                         'picking_id': picking.id,
                         'name': rec.voucher_number,
                     })
-            elif rec.picking_type_code != 'incoming':
-                # llamamos al chequeo de stock voucher ya que este metodo
-                # termina usando do_transfer pero el chequeo se llama solo
-                # con do_new_transfer
-                rec.active_picking_ids.do_stock_voucher_transfer_check()
+        return super(StockPickingBatch, self.with_context(do_not_assign_numbers=True)).action_done()
 
-        res = super(StockPickingBatch, self.with_context(
-            do_not_assign_numbers=True)).action_transfer()
-        # nosotros preferimos que no se haga en muchos pasos y una vez
-        # confirmado se borre lo no hecho y se marque como realizado
-        # lo hago para distinto de incomring porque venia andando bien para
-        # Incoming, pero no debería hacer falta este chequeo
-        # self.remove_undone_pickings()
-        return res
-
-    def do_unreserve_picking(self):
-        batches = self.get_not_empties()
-        if not batches.verify_state("in_progress"):
-            self._check_company()
-            pickings_todo = self.mapped('picking_ids')
-            self.write({'state': 'draft'})
-            pickings_todo.do_unreserve()
+    def action_view_stock_picking(self):
+        """This function returns an action that display existing pickings of
+        given batch picking.
+        """
+        self.ensure_one()
+        pickings = self.mapped("picking_ids")
+        action = self.env.ref("stock.action_picking_tree_all").read([])[0]
+        action["domain"] = [("id", "in", pickings.ids)]
+        return action

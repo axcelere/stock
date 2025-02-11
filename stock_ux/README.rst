@@ -34,6 +34,12 @@ Stock UX
 #. Add Rotation and Location Rotation to Reordering Rules (orderpoint): delivered quantities to customers on last 120 days divided per 4 (to make it monthly)
 #. Add optional constraints configurable by Picking Type
 #. Add partner field on procurement group form view.
+#. Show location and warehouse filters on all products and product templates views (not only the one on inventory)
+#. When archive a replenishment rule set min, max and multiple quantities in 0.
+#. Show inactive replenishment rules if the product is active (with warning decorator).
+#. Send template established in operation type when confirm picking.
+#. Add an optional setting to print remaining quantities not yet delivered on Delivery Slips: "Show remaining quantities not yet delivered on Delivery Slips."
+#. Adds a review toggle per line that allows the user to indicate when the replenishment order is ready to be confirmed.
 
 Installation
 ============

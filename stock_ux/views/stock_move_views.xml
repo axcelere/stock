@@ -58,18 +58,9 @@
         <field name="arch" type="xml">
             <field name="product_id" position="before">
                 <!-- por ejemplo, lo usamos para mostrar este campo en stock_usability_batch_picking -->
-                <field name="picking_id" invisible="not context.get('show_picking', False)"/>
+                <field name="picking_id" column_invisible="not context.get('show_picking', False)"/>
             </field>
         </field>
-    </record>
-
-    <record id="stock.stock_move_action" model="ir.actions.act_window">
-        <field name="name">Products Moves</field>
-    </record>
-
-    <record id="stock.stock_move_menu" model="ir.ui.menu">
-        <field name="name">Products Moves</field>
-        <field name="groups_id" eval="[(3, ref('base.group_no_one'))]"/>
     </record>
 
 </odoo>
