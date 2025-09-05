@@ -16,4 +16,11 @@ def migrate(cr, version):
         _logger.info(f"Eliminando vista {view.xml_id or view.id} que contiene 'regimenes_ganancias_ids'")
         view.unlink()
 
+    views_with_regimenes_ganancias = IrUiView.search([
+        ('arch_db', 'ilike', 'l10n_ar_report_signature')
+    ])
+    for view in views_with_regimenes_ganancias:
+        _logger.info(f"Eliminando vista {view.xml_id or view.id} que contiene 'l10n_ar_report_signature'")
+        view.unlink()
+
     env.cr.commit()
